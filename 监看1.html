@@ -556,78 +556,21 @@
             color: #fff;
         }
 
-        /* 竖屏提示遮罩 */
-        .rotate-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #050505;
-            z-index: 9999;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .rotate-icon {
-            width: 80px;
-            height: 80px;
-            animation: rotate-hint 2s ease-in-out infinite;
-        }
-
-        @keyframes rotate-hint {
-            0%, 100% { transform: rotate(0deg); }
-            40% { transform: rotate(-90deg); }
-            60% { transform: rotate(-90deg); }
-        }
-
-        .rotate-text {
-            font-size: 1rem;
-            color: #888;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
-
-        .rotate-sub {
-            font-size: 0.75rem;
-            color: #444;
-            letter-spacing: 2px;
-        }
-
-        /* 横屏模式下隐藏提示，显示内容 */
-        @media (orientation: landscape) {
-            .rotate-overlay { display: none !important; }
-        }
-
-        /* 竖屏模式下显示提示，隐藏内容 */
+        /* 竖屏下不再弹出提示，直接显示页面内容 */
         @media (orientation: portrait) {
-            .rotate-overlay { display: flex !important; }
             .main-container,
             .back-btn,
             .clock-toggle,
             .mc-widget,
             .update-info,
-            .celebration-overlay { visibility: hidden; }
+            .celebration-overlay { visibility: visible; }
         }
 
     </style>
 </head>
 <body>
 
-<!-- 竖屏旋转提示 -->
-<div class="rotate-overlay" id="rotateOverlay">
-    <svg class="rotate-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- 手机图标 -->
-        <rect x="25" y="10" width="30" height="50" rx="4" stroke="#fb7299" stroke-width="2.5" fill="none"/>
-        <circle cx="40" cy="53" r="2" fill="#fb7299"/>
-        <!-- 旋转箭头 -->
-        <path d="M15 40 C15 25 25 15 40 15" stroke="#555" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
-        <polyline points="36,11 40,15 36,19" stroke="#555" stroke-width="2" fill="none"/>
-    </svg>
-    <div class="rotate-text">请旋转屏幕</div>
-    <div class="rotate-sub">本页面仅支持横屏显示</div>
-</div>
+
 
 <a class="back-btn" onclick="window.history.back()">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
