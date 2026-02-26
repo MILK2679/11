@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
+    <meta name="full-screen" content="yes">
+    <title>Mr_牛奶粉丝实时统计 + 学习时钟</title>
+    <!-- Odometer CSS - 本地化 -->
+    <style>
+        /* Odometer Theme - Minimal */
+        .odometer.odometer-auto-theme, .odometer.odometer-theme-minimal {
+            display: inline-block;
+            vertical-align: middle;
+            *vertical-align: auto;
+            *zoom: 1;
+            *display: inline;
+            position: relative;
+        }
+        .odometer.odometer-auto-theme .odometer-digit, .odometer.odometer-theme-minimal .odometer-digit {
+            display: inline-block;
+            vertical-align: middle;
+            *vertical-align: auto;
+            *zoom: 1;
+            *display: inline;
+            position: relative;
+        }
+        .odometer.odometer-auto-theme .odometer-digit .odometer-digit-spacer, .odometer.odometer-theme-minimal .odometer-digit .odometer-digit-spacer {
+            display: inline-block;
+            vertical-align: middle;
+            *vertical-align: auto;
+            *zoom: 1;
+            *display: inline;
+            visibility: hidden;
+        }
+        .odometer.odometer-auto-theme .odometer-digit .odometer-digit-inner, .odometer.odometer-theme-minimal .odometer-digit .odometer-digit-inner {
+            text-align: left;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+        .odometer.odometer-auto-theme .odometer-digit .odometer-ribbon, .odometer.odometer-theme-minimal .odometer-digit .odometer-ribbon {
+            display: block;
+        }
+        .odometer.odometer-auto-theme .odometer-digit .odometer-ribbon-inner, .odometer.odometer-theme-minimal .odometer-digit .odometer-ribbon-inner {
+            display: block;
+            -webkit-backface-visibility: hidden;
+        }
+        .odometer.odometer-auto-theme .odometer-digit .odometer-value, .odometer.odometer-theme-minimal .odometer-digit .odometer-value {
+            display: block;
+            -webkit-transform: translateZ(0);
+        }
+        .odometer.odometer-auto-theme .odometer-digit .odometer-value.odometer-last-value, .odometer.odometer-theme-minimal .odometer-digit .odometer-value.odometer-last-value {
+            position: absolute;
+        }
+        .odometer.odometer-auto-theme.odometer-animating-up .odometer-ribbon-inner, .odometer.odometer-theme-minimal.odometer-animating-up .odometer-ribbon-inner {
+            -webkit-transition: -webkit-transform 2s;
+            -moz-transition: -moz-transform 2s;
+            -ms-transition: -ms-transform 2s;
+            -o-transition: -o-transform 2s;
+            transition: transform 2s;
+        }
+        .odometer.odometer-auto-theme.odometer-animating-up.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-minimal.odometer-animating-up.odometer-animating .odometer-ribbon-inner {
+            -webkit-transform: translateY(-100%);
+            -moz-transform: translateY(-100%);
+            -ms-transform: translateY(-100%);
+            -o-transform: translateY(-100%);
+            transform: translateY(-100%);
+        }
+        .odometer.odometer-auto-theme.odometer-animating-down .odometer-ribbon-inner, .odometer.odometer-theme-minimal.odometer-animating-down .odometer-ribbon-inner {
+            -webkit-transform: translateY(-100%);
+            -moz-transform: translateY(-100%);
+            -ms-transform: translateY(-100%);
+            -o-transform: translateY(-100%);
+            transform: translateY(-100%);
+        }
+        .odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-minimal.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
+            -webkit-transition: -webkit-transform 2s;
+            -moz-transition: -moz-transform 2s;
+            -ms-transition: -ms-transform 2s;
+            -o-transition: -o-transform 2s;
+            transition: transform 2s;
+            -webkit-transform: translateY(0);
+            -moz-transform: translateY(0);
+            -ms-transform: translateY(0);
+            -o-transform: translateY(0);
+            transform: translateY(0);
+        }
+    </style>
+    <style>
+        :root { --pink: #fb7299; --blue: #00aeec; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #050505; 
+            color: white;
+            font-family: "Arial Black", sans-serif;
+            height: 100vh; 
+            overflow: hidden; 
+            perspective: 1200px;
+        }
+
+        .back-btn {
+            position: fixed; top: 30px; left: 30px; z-index: 100;
+            display: flex; align-items: center; padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px; color: #888; text-decoration: none;
+            font-size: 0.9rem; transition: all 0.3s; cursor: pointer; backdrop-filter: blur(10px);
+        }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; border-color: var(--pink); }
+
+        /* 时钟按钮 */
+        .clock-toggle {
+            position: fixed; top: 30px; right: 30px; z-index: 100;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px; color: #888;
+            font-size: 0.9rem; transition: all 0.3s; cursor: pointer; 
+            backdrop-filter: blur(10px);
+            font-family: "Arial Black", sans-serif;
+        }
+        .clock-toggle:hover { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: #fff; 
+            border-color: var(--pink); 
+        }
+        .clock-toggle:active,
+        .clock-toggle:focus {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            outline: none;
+        }
+
+        /* 主容器 - 两栏布局 */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            transition: all 0.5s ease;
+        }
+
+        /* 粉丝数容器 */
+        .fans-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
+        }
+
+        .fans-section.full-width {
+            flex: 1;
+        }
+
+        /* 时钟容器 */
+        .clock-section {
+            flex: 0 0 0;
+            width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            transition: all 0.5s ease;
+            padding: 0;
+            opacity: 0;
+        }
+
+        .clock-section.active {
+            flex: 0 0 275px;
+            width: 320px;
+            padding: 25px 15px;
+            opacity: 1;
+        }
+
+        /* 粉丝数样式 */
+        .container { text-align: center; transform-style: preserve-3d; width: 100%; }
+        
+        .odometer-wrapper {
+            display: inline-block;
+            animation: floating 5s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+        .odometer {
+            font-size: clamp(4rem, 15vw, 11rem) !important;
+            font-weight: 900;
+            background: linear-gradient(to right, var(--pink) 20%, #fff 50%, var(--pink) 80%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+            text-shadow: 0 1px 0 #ccc, 0 4px 0 #999, 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: rotateX(10deg) rotateY(-5deg); }
+            50% { transform: rotateX(-5deg) rotateY(10deg) translateY(-20px); }
+        }
+        @keyframes shine { to { background-position: 200% center; } }
+
+        .label {
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            color: #666;
+            letter-spacing: 8px;
+            margin-top: 20px;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+
+        /* MC服务器状态 - 左下角组件 */
+        .mc-widget {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+        .mc-widget:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(74, 222, 128, 0.3);
+        }
+        .mc-widget-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #333;
+            flex-shrink: 0;
+            transition: background 0.5s;
+        }
+        .mc-widget-dot.online {
+            background: #4ade80;
+            box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
+            animation: mc-pulse 2s ease-in-out infinite;
+        }
+        @keyframes mc-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(74, 222, 128, 0.8); }
+            50% { opacity: 0.5; box-shadow: 0 0 12px rgba(74, 222, 128, 0.3); }
+        }
+        .mc-widget-text {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .mc-widget-label {
+            font-size: 0.6rem;
+            color: #555;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+        .mc-widget-count {
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: #888;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .mc-widget-count.online {
+            color: #4ade80;
+        }
+        .mc-widget-count.offline {
+            color: #333;
+            font-size: 0.7rem;
+        }
+
+        /* 全屏按钮 */
+        .fullscreen-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: #888;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            font-size: 0;
+        }
+        .fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: var(--pink);
+        }
+        .fullscreen-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            color: #888;
+            transition: color 0.3s;
+        }
+        .fullscreen-btn:hover svg { color: #fff; }
+
+        .update-info {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: #555;
+            letter-spacing: 2px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--pink);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(251, 114, 153, 0.7);
+            }
+            50% { 
+                opacity: 0.6;
+                box-shadow: 0 0 0 10px rgba(251, 114, 153, 0);
+            }
+        }
+
+        /* 时钟样式 */
+        .current-time {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(251, 114, 153, 0.5);
+            margin-bottom: 15px;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+        }
+
+        .timer-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            max-width: 220px;
+            margin-bottom: 12px;
+        }
+
+        .timer-btn {
+            padding: 9px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(251, 114, 153, 0.3);
+            border-radius: 18px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+            font-family: "Arial Black", sans-serif;
+        }
+
+        .timer-btn:hover {
+            background: rgba(251, 114, 153, 0.15);
+            border-color: var(--pink);
+        }
+
+        .custom-timer {
+            display: flex;
+            gap: 6px;
+        }
+
+        .custom-input {
+            flex: 1;
+            padding: 9px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            color: #fff;
+            font-size: 0.8rem;
+            text-align: center;
+            outline: none;
+        }
+
+        .custom-input:focus {
+            border-color: var(--pink);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .timers-list {
+            width: 100%;
+            max-width: 220px;
+            max-height: 280px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 5px;
+        }
+
+        /* 自定义滚动条样式 */
+        .timers-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .timers-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+        }
+
+        .timers-list::-webkit-scrollbar-thumb {
+            background: rgba(251, 114, 153, 0.3);
+            border-radius: 2px;
+        }
+
+        .timers-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(251, 114, 153, 0.5);
+        }
+
+        .timer-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(251, 114, 153, 0.2);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .timer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .timer-title {
+            font-size: 0.7rem;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--pink);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-display.warning { color: #fbbf24; }
+        .timer-display.danger { 
+            color: #ef4444; 
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .cancel-btn {
+            padding: 5px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 10px;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.3s;
+        }
+
+        .cancel-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        /* 庆祝遮罩 */
+        .celebration-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 5, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .celebration-overlay.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .celebration-content { text-align: center; }
+
+        .celebration-message {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(to right, var(--pink), #fff, var(--pink));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 2s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .celebration-subtitle {
+            font-size: 1.5rem;
+            color: #888;
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+        }
+
+        .close-btn {
+            padding: 15px 40px;
+            background: rgba(251, 114, 153, 0.2);
+            border: 2px solid var(--pink);
+            border-radius: 30px;
+            color: var(--pink);
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 900;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: var(--pink);
+            color: #fff;
+        }
+
+        /* 竖屏提示遮罩 */
+        .rotate-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #050505;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .rotate-icon {
+            width: 80px;
+            height: 80px;
+            animation: rotate-hint 2s ease-in-out infinite;
+        }
+
+        @keyframes rotate-hint {
+            0%, 100% { transform: rotate(0deg); }
+            40% { transform: rotate(-90deg); }
+            60% { transform: rotate(-90deg); }
+        }
+
+        .rotate-text {
+            font-size: 1rem;
+            color: #888;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .rotate-sub {
+            font-size: 0.75rem;
+            color: #444;
+            letter-spacing: 2px;
+        }
+
+        /* 横屏模式下隐藏提示，显示内容 */
+        @media (orientation: landscape) {
+            .rotate-overlay { display: none !important; }
+        }
+
+        /* 竖屏模式下显示提示，隐藏内容 */
+        @media (orientation: portrait) {
+            .rotate-overlay { display: flex !important; }
+            .main-container,
+            .back-btn,
+            .clock-toggle,
+            .mc-widget,
+            .update-info,
+            .celebration-overlay { visibility: hidden; }
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- 竖屏旋转提示 -->
+<div class="rotate-overlay" id="rotateOverlay">
+    <svg class="rotate-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- 手机图标 -->
+        <rect x="25" y="10" width="30" height="50" rx="4" stroke="#fb7299" stroke-width="2.5" fill="none"/>
+        <circle cx="40" cy="53" r="2" fill="#fb7299"/>
+        <!-- 旋转箭头 -->
+        <path d="M15 40 C15 25 25 15 40 15" stroke="#555" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
+        <polyline points="36,11 40,15 36,19" stroke="#555" stroke-width="2" fill="none"/>
+    </svg>
+    <div class="rotate-text">请旋转屏幕</div>
+    <div class="rotate-sub">本页面仅支持横屏显示</div>
+</div>
+
+<a class="back-btn" onclick="window.history.back()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+</a>
+
+<button class="clock-toggle" onclick="toggleClock()">⏱</button>
+
+<!-- MC服务器状态 - 左下角独立组件 -->
+<div class="mc-widget">
+    <div class="mc-widget-dot" id="mcDot"></div>
+    <svg width="18" height="18" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="16" height="16" fill="#5a8a3c"/>
+        <rect x="10" y="9" width="4" height="4" fill="#050505"/>
+        <rect x="18" y="9" width="4" height="4" fill="#050505"/>
+        <rect x="13" y="14" width="6" height="2" fill="#050505"/>
+        <rect x="12" y="16" width="2" height="3" fill="#050505"/>
+        <rect x="18" y="16" width="2" height="3" fill="#050505"/>
+        <rect x="11" y="22" width="4" height="4" fill="#5a8a3c"/>
+        <rect x="17" y="22" width="4" height="4" fill="#5a8a3c"/>
+    </svg>
+    <div class="mc-widget-text">
+        <span class="mc-widget-label">Puremilk</span>
+        <span class="mc-widget-count" id="mcPlayers">--</span>
+    </div>
+</div>
+
+<div class="main-container">
+    <!-- 粉丝数区域 -->
+    <div class="fans-section full-width">
+        <div class="container">
+            <h1 style="color:#111; letter-spacing: 15px; margin-bottom:0; font-size: 1rem;">MR_MILK</h1>
+            <div class="odometer-wrapper">
+                <div id="count" class="odometer">0</div>
+            </div>
+            <div class="label">BILIBILI 粉丝数</div>
+        </div>
+    </div>
+
+    <!-- 时钟区域 -->
+    <div class="clock-section" id="clockSection">
+        <div class="current-time" id="currentTime">00:00</div>
+        
+        <div class="timer-controls">
+            <button class="timer-btn" onclick="startTimer(10)">10分钟</button>
+            <button class="timer-btn" onclick="startTimer(5)">5分钟</button>
+            
+            <div class="custom-timer">
+                <input type="number" class="custom-input" id="customMinutes" placeholder="自定义" min="1">
+                <button class="timer-btn" onclick="startCustomTimer()">开始</button>
+            </div>
+        </div>
+
+        <div class="timers-list" id="timersList"></div>
+    </div>
+</div>
+
+<div class="update-info">
+    <span class="pulse-dot"></span>
+    <span>实时更新中</span>
+</div>
+
+<!-- 庆祝遮罩 -->
+<div class="celebration-overlay" id="celebrationOverlay">
+    <div class="celebration-content">
+        <div class="celebration-message">⏰ 时间到！</div>
+        <div class="celebration-subtitle">专注时光结束</div>
+        <button class="close-btn" onclick="closeCelebration()">关闭</button>
+    </div>
+</div>
+
+<!-- Odometer JS - 本地化 -->
+<script>
+/*!
+ * Odometer.js v0.4.7
+ */
+(function() {
+  var COUNT_FRAMERATE, COUNT_MS_PER_FRAME, DIGIT_FORMAT, DIGIT_HTML, DIGIT_SPEEDBOOST, DURATION, FORMAT_MARK_HTML, FORMAT_PARSER, FRAMERATE, FRAMES_PER_VALUE, MS_PER_FRAME, MutationObserver, Odometer, RIBBON_HTML, TRANSITION_END_EVENTS, TRANSITION_SUPPORT, VALUE_HTML, addClass, createFromHTML, fractionalPart, now, removeClass, requestAnimationFrame, round, transitionCheckStyles, trigger, truncate, wrapJQuery, _jQueryWrapped, _old, _ref, _ref1,
+    __slice = [].slice;
+
+  VALUE_HTML = '<span class="odometer-value"></span>';
+
+  RIBBON_HTML = '<span class="odometer-ribbon"><span class="odometer-ribbon-inner">' + VALUE_HTML + '</span></span>';
+
+  DIGIT_HTML = '<span class="odometer-digit"><span class="odometer-digit-spacer">8</span><span class="odometer-digit-inner">' + RIBBON_HTML + '</span></span>';
+
+  FORMAT_MARK_HTML = '<span class="odometer-formatting-mark"></span>';
+
+  DIGIT_FORMAT = '(,ddd).dd';
+
+  FORMAT_PARSER = /^\(?([^)]*)\)?(?:(.)(d+))?$/;
+
+  FRAMERATE = 30;
+
+  DURATION = 2000;
+
+  COUNT_FRAMERATE = 20;
+
+  FRAMES_PER_VALUE = 2;
+
+  DIGIT_SPEEDBOOST = 0.5;
+
+  MS_PER_FRAME = 1000 / FRAMERATE;
+
+  COUNT_MS_PER_FRAME = 1000 / COUNT_FRAMERATE;
+
+  TRANSITION_END_EVENTS = 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd';
+
+  transitionCheckStyles = document.createElement('div').style;
+
+  TRANSITION_SUPPORT = (transitionCheckStyles.transition != null) || (transitionCheckStyles.webkitTransition != null) || (transitionCheckStyles.mozTransition != null) || (transitionCheckStyles.oTransition != null);
+
+  requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+  MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
+
+  createFromHTML = function(html) {
+    var el;
+    el = document.createElement('div');
+    el.innerHTML = html;
+    return el.children[0];
+  };
+
+  removeClass = function(el, name) {
+    return el.className = el.className.replace(new RegExp("(^| )" + (name.split(' ').join('|')) + "( |$)", 'gi'), ' ');
+  };
+
+  addClass = function(el, name) {
+    removeClass(el, name);
+    return el.className += " " + name;
+  };
+
+  trigger = function(el, name) {
+    var evt;
+    if (document.createEvent != null) {
+      evt = document.createEvent('HTMLEvents');
+      evt.initEvent(name, true, true);
+      return el.dispatchEvent(evt);
+    }
+  };
+
+  now = function() {
+    var _ref, _ref1;
+    return (_ref = (_ref1 = window.performance) != null ? typeof _ref1.now === "function" ? _ref1.now() : void 0 : void 0) != null ? _ref : +(new Date);
+  };
+
+  round = function(val, precision) {
+    if (precision == null) {
+      precision = 0;
+    }
+    if (!precision) {
+      return Math.round(val);
+    }
+    val *= Math.pow(10, precision);
+    val += 0.5;
+    val = Math.floor(val);
+    return val /= Math.pow(10, precision);
+  };
+
+  truncate = function(val) {
+    if (val < 0) {
+      return Math.ceil(val);
+    } else {
+      return Math.floor(val);
+    }
+  };
+
+  fractionalPart = function(val) {
+    return val - round(val);
+  };
+
+  _jQueryWrapped = false;
+
+  (wrapJQuery = function() {
+    var property, _i, _len, _ref, _results;
+    if (_jQueryWrapped) {
+      return;
+    }
+    if (window.jQuery != null) {
+      _jQueryWrapped = true;
+      _ref = ['html', 'text'];
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        property = _ref[_i];
+        _results.push((function(property) {
+          var old;
+          old = window.jQuery.fn[property];
+          return window.jQuery.fn[property] = function(val) {
+            var _ref1;
+            if ((val == null) || (((_ref1 = this[0]) != null ? _ref1.odometer : void 0) == null)) {
+              return old.apply(this, arguments);
+            }
+            return this[0].odometer.update(val);
+          };
+        })(property));
+      }
+      return _results;
+    }
+  })();
+
+  setTimeout(wrapJQuery, 0);
+
+  Odometer = (function() {
+    function Odometer(options) {
+      var e, k, property, v, _base, _i, _len, _ref, _ref1, _ref2,
+        _this = this;
+      this.options = options;
+      this.el = this.options.el;
+      if (this.el.odometer != null) {
+        return this.el.odometer;
+      }
+      this.el.odometer = this;
+      _ref = Odometer.options;
+      for (k in _ref) {
+        v = _ref[k];
+        if (this.options[k] == null) {
+          this.options[k] = v;
+        }
+      }
+      if ((_base = this.options).duration == null) {
+        _base.duration = DURATION;
+      }
+      this.MAX_VALUES = ((this.options.duration / MS_PER_FRAME) / FRAMES_PER_VALUE) | 0;
+      this.resetFormat();
+      this.value = this.cleanValue((_ref1 = this.options.value) != null ? _ref1 : '');
+      this.renderInside();
+      this.render();
+      try {
+        _ref2 = ['HTML', 'Text'];
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          property = _ref2[_i];
+          (function(property) {
+            return Object.defineProperty(_this.el, 'inner' + property, {
+              get: function() {
+                var _ref3;
+                if (property === 'HTML') {
+                  return _this.inside.outerHTML;
+                } else {
+                  return (_ref3 = _this.inside.innerText) != null ? _ref3 : _this.inside.textContent;
+                }
+              },
+              set: function(val) {
+                return _this.update(val);
+              }
+            });
+          })(property);
+        }
+      } catch (_error) {
+        e = _error;
+        this.watchForMutations();
+      }
+      this;
+    }
+
+    Odometer.prototype.renderInside = function() {
+      this.inside = document.createElement('div');
+      this.inside.className = 'odometer-inside';
+      this.el.innerHTML = '';
+      return this.el.appendChild(this.inside);
+    };
+
+    Odometer.prototype.watchForMutations = function() {
+      var e,
+        _this = this;
+      if (MutationObserver == null) {
+        return;
+      }
+      try {
+        if (this.observer == null) {
+          this.observer = new MutationObserver(function(mutations) {
+            var newVal;
+            newVal = _this.el.innerText;
+            _this.renderInside();
+            _this.render(_this.value);
+            return _this.update(newVal);
+          });
+        }
+        this.watchMutations = true;
+        return this.startWatchingMutations();
+      } catch (_error) {
+        e = _error;
+      }
+    };
+
+    Odometer.prototype.startWatchingMutations = function() {
+      if (this.watchMutations) {
+        return this.observer.observe(this.el, {
+          childList: true
+        });
+      }
+    };
+
+    Odometer.prototype.stopWatchingMutations = function() {
+      var _ref;
+      return (_ref = this.observer) != null ? _ref.disconnect() : void 0;
+    };
+
+    Odometer.prototype.cleanValue = function(val) {
+      var _ref;
+      if (typeof val === 'string') {
+        val = val.replace((_ref = this.format.radix) != null ? _ref : '.', '<radix>');
+        val = val.replace(/[.,]/g, '');
+        val = val.replace('<radix>', '.');
+        val = parseFloat(val, 10) || 0;
+      }
+      return round(val, this.format.precision);
+    };
+
+    Odometer.prototype.bindTransitionEnd = function() {
+      var event, renderEnqueued, _i, _len, _ref, _results,
+        _this = this;
+      if (this.transitionEndBound) {
+        return;
+      }
+      this.transitionEndBound = true;
+      renderEnqueued = false;
+      _ref = TRANSITION_END_EVENTS.split(' ');
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        event = _ref[_i];
+        _results.push(this.el.addEventListener(event, function() {
+          if (renderEnqueued) {
+            return true;
+          }
+          renderEnqueued = true;
+          setTimeout(function() {
+            _this.render();
+            renderEnqueued = false;
+            return trigger(_this.el, 'odometerdone');
+          }, 0);
+          return true;
+        }, false));
+      }
+      return _results;
+    };
+
+    Odometer.prototype.resetFormat = function() {
+      var format, fractional, parsed, precision, radix, repeating, _ref, _ref1;
+      format = (_ref = this.options.format) != null ? _ref : DIGIT_FORMAT;
+      format || (format = 'd');
+      parsed = FORMAT_PARSER.exec(format);
+      if (!parsed) {
+        throw new Error("Odometer: Unparsable digit format");
+      }
+      _ref1 = parsed.slice(1, 4), repeating = _ref1[0], radix = _ref1[1], fractional = _ref1[2];
+      precision = (fractional != null ? fractional.length : void 0) || 0;
+      return this.format = {
+        repeating: repeating,
+        radix: radix,
+        precision: precision
+      };
+    };
+
+    Odometer.prototype.render = function(value) {
+      var classes, cls, digit, match, newClasses, theme, wholePart, _i, _j, _len, _len1, _ref;
+      if (value == null) {
+        value = this.value;
+      }
+      this.stopWatchingMutations();
+      this.resetFormat();
+      this.inside.innerHTML = '';
+      theme = this.options.theme;
+      classes = this.el.className.split(' ');
+      newClasses = [];
+      for (_i = 0, _len = classes.length; _i < _len; _i++) {
+        cls = classes[_i];
+        if (!cls.length) {
+          continue;
+        }
+        if (match = /^odometer-theme-(.+)$/.exec(cls)) {
+          theme = match[1];
+          continue;
+        }
+        if (/^odometer(-|$)/.test(cls)) {
+          continue;
+        }
+        newClasses.push(cls);
+      }
+      newClasses.push('odometer');
+      if (!TRANSITION_SUPPORT) {
+        newClasses.push('odometer-no-transitions');
+      }
+      if (theme) {
+        newClasses.push("odometer-theme-" + theme);
+      } else {
+        newClasses.push("odometer-auto-theme");
+      }
+      this.el.className = newClasses.join(' ');
+      this.ribbons = {};
+      this.digits = [];
+      wholePart = !this.format.precision || !fractionalPart(value) || false;
+      _ref = value.toString().split('').reverse();
+      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+        digit = _ref[_j];
+        if (digit === '.') {
+          wholePart = true;
+        }
+        this.addDigit(digit, wholePart);
+      }
+      return this.startWatchingMutations();
+    };
+
+    Odometer.prototype.update = function(newValue) {
+      var diff,
+        _this = this;
+      newValue = this.cleanValue(newValue);
+      if (!(diff = newValue - this.value)) {
+        return;
+      }
+      removeClass(this.el, 'odometer-animating-up odometer-animating-down odometer-animating');
+      if (diff > 0) {
+        addClass(this.el, 'odometer-animating-up');
+      } else {
+        addClass(this.el, 'odometer-animating-down');
+      }
+      this.stopWatchingMutations();
+      this.animate(newValue);
+      this.startWatchingMutations();
+      setTimeout(function() {
+        _this.el.offsetHeight;
+        return addClass(_this.el, 'odometer-animating');
+      }, 0);
+      return this.value = newValue;
+    };
+
+    Odometer.prototype.renderDigit = function() {
+      return createFromHTML(DIGIT_HTML);
+    };
+
+    Odometer.prototype.insertDigit = function(digit, before) {
+      if (before != null) {
+        return this.inside.insertBefore(digit, before);
+      } else if (!this.inside.children.length) {
+        return this.inside.appendChild(digit);
+      } else {
+        return this.inside.insertBefore(digit, this.inside.children[0]);
+      }
+    };
+
+    Odometer.prototype.addSpacer = function(chr, before, extraClasses) {
+      var spacer;
+      spacer = createFromHTML(FORMAT_MARK_HTML);
+      spacer.innerHTML = chr;
+      if (extraClasses) {
+        addClass(spacer, extraClasses);
+      }
+      return this.insertDigit(spacer, before);
+    };
+
+    Odometer.prototype.addDigit = function(value, repeating) {
+      var chr, digit, resetted, _ref;
+      if (repeating == null) {
+        repeating = true;
+      }
+      if (value === '-') {
+        return this.addSpacer(value, null, 'odometer-negation-mark');
+      }
+      if (value === '.') {
+        return this.addSpacer((_ref = this.format.radix) != null ? _ref : '.', null, 'odometer-radix-mark');
+      }
+      if (repeating) {
+        resetted = false;
+        while (true) {
+          if (!this.format.repeating.length) {
+            if (resetted) {
+              throw new Error("Bad odometer format without digits");
+            }
+            this.resetFormat();
+            resetted = true;
+          }
+          chr = this.format.repeating[this.format.repeating.length - 1];
+          this.format.repeating = this.format.repeating.substring(0, this.format.repeating.length - 1);
+          if (chr === 'd') {
+            break;
+          }
+          this.addSpacer(chr);
+        }
+      }
+      digit = this.renderDigit();
+      digit.querySelector('.odometer-value').innerHTML = value;
+      this.digits.push(digit);
+      return this.insertDigit(digit);
+    };
+
+    Odometer.prototype.animate = function(newValue) {
+      if (!TRANSITION_SUPPORT || this.options.animation === 'count') {
+        return this.animateCount(newValue);
+      } else {
+        return this.animateSlide(newValue);
+      }
+    };
+
+    Odometer.prototype.animateCount = function(newValue) {
+      var cur, diff, last, start, tick,
+        _this = this;
+      if (!(diff = +newValue - this.value)) {
+        return;
+      }
+      start = last = now();
+      cur = this.value;
+      return (tick = function() {
+        var delta, dist, fraction;
+        if ((now() - start) > _this.options.duration) {
+          _this.value = newValue;
+          _this.render();
+          trigger(_this.el, 'odometerdone');
+          return;
+        }
+        delta = now() - last;
+        if (delta > COUNT_MS_PER_FRAME) {
+          last = now();
+          fraction = delta / _this.options.duration;
+          dist = diff * fraction;
+          cur += dist;
+          _this.render(Math.round(cur));
+        }
+        if (requestAnimationFrame != null) {
+          return requestAnimationFrame(tick);
+        } else {
+          return setTimeout(tick, COUNT_MS_PER_FRAME);
+        }
+      })();
+    };
+
+    Odometer.prototype.getDigitCount = function() {
+      var i, max, value, values, _i, _len;
+      values = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      for (i = _i = 0, _len = values.length; _i < _len; i = ++_i) {
+        value = values[i];
+        values[i] = Math.abs(value);
+      }
+      max = Math.max.apply(Math, values);
+      return Math.ceil(Math.log(max + 1) / Math.log(10));
+    };
+
+    Odometer.prototype.getFractionalDigitCount = function() {
+      var i, parser, parts, value, values, _i, _len;
+      values = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      parser = /^\-?\d*\.(\d*?)0*$/;
+      for (i = _i = 0, _len = values.length; _i < _len; i = ++_i) {
+        value = values[i];
+        values[i] = value.toString();
+        parts = parser.exec(values[i]);
+        if (parts == null) {
+          values[i] = 0;
+        } else {
+          values[i] = parts[1].length;
+        }
+      }
+      return Math.max.apply(Math, values);
+    };
+
+    Odometer.prototype.resetDigits = function() {
+      this.digits = [];
+      this.ribbons = [];
+      this.inside.innerHTML = '';
+      return this.resetFormat();
+    };
+
+    Odometer.prototype.animateSlide = function(newValue) {
+      var boosted, cur, diff, digitCount, digits, dist, end, fractionalCount, frame, frames, i, incr, j,mark, numEl, oldValue, start, _base, _i, _j, _k, _l, _len, _len1, _len2, _m, _ref, _results;
+      oldValue = this.value;
+      fractionalCount = this.getFractionalDigitCount(oldValue, newValue);
+      if (fractionalCount) {
+        newValue = newValue * Math.pow(10, fractionalCount);
+        oldValue = oldValue * Math.pow(10, fractionalCount);
+      }
+      if (!(diff = newValue - oldValue)) {
+        return;
+      }
+      this.bindTransitionEnd();
+      digitCount = this.getDigitCount(oldValue, newValue);
+      digits = [];
+      boosted = 0;
+      for (i = _i = 0; 0 <= digitCount ? _i < digitCount : _i > digitCount; i = 0 <= digitCount ? ++_i : --_i) {
+        start = truncate(oldValue / Math.pow(10, digitCount - i - 1));
+        end = truncate(newValue / Math.pow(10, digitCount - i - 1));
+        dist = end - start;
+        if (Math.abs(dist) > this.MAX_VALUES) {
+          frames = [];
+          incr = dist / (this.MAX_VALUES + this.MAX_VALUES * boosted * DIGIT_SPEEDBOOST);
+          cur = start;
+          while ((dist > 0 && cur < end) || (dist < 0 && cur > end)) {
+            frames.push(Math.round(cur));
+            cur += incr;
+          }
+          if (frames[frames.length - 1] !== end) {
+            frames.push(end);
+          }
+          boosted++;
+        } else {
+          frames = (function() {
+            _results = [];
+            for (var _j = start; start <= end ? _j <= end : _j >= end; start <= end ? _j++ : _j--){ _results.push(_j); }
+            return _results;
+          }).apply(this);
+        }
+        for (i = _k = 0, _len = frames.length; _k < _len; i = ++_k) {
+          frame = frames[i];
+          frames[i] = Math.abs(frame % 10);
+        }
+        digits.push(frames);
+      }
+      this.resetDigits();
+      _ref = digits.reverse();
+      for (i = _l = 0, _len1 = _ref.length; _l < _len1; i = ++_l) {
+        frames = _ref[i];
+        if (!this.digits[i]) {
+          this.addDigit(frames[0]);
+        }
+        if ((_base = this.ribbons)[i] == null) {
+          _base[i] = this.digits[i].querySelector('.odometer-ribbon-inner');
+        }
+        this.ribbons[i].innerHTML = '';
+        if (diff < 0) {
+          frames = frames.reverse();
+        }
+        for (j = _m = 0, _len2 = frames.length; _m < _len2; j = ++_m) {
+          frame = frames[j];
+          numEl = document.createElement('div');
+          numEl.className = 'odometer-value';
+          numEl.innerHTML = frame;
+          this.ribbons[i].appendChild(numEl);
+          if (j === frames.length - 1) {
+            addClass(numEl, 'odometer-last-value');
+          }
+          if (j === 0) {
+            addClass(numEl, 'odometer-first-value');
+          }
+        }
+      }
+      if (start < 0) {
+        this.addDigit('-');
+      }
+      mark = this.inside.querySelector('.odometer-radix-mark');
+      if (mark != null) {
+        mark.parent.removeChild(mark);
+      }
+      if (fractionalCount) {
+        return this.renderInside();
+      }
+    };
+
+    return Odometer;
+
+  })();
+
+  Odometer.options = (_ref = window.odometerOptions) != null ? _ref : {};
+
+  setTimeout(function() {
+    var k, v, _base, _ref1, _results;
+    if (window.odometerOptions) {
+      _ref1 = window.odometerOptions;
+      _results = [];
+      for (k in _ref1) {
+        v = _ref1[k];
+        _results.push((_base = Odometer.options)[k] != null ? (_base = Odometer.options)[k] : _base[k] = v);
+      }
+      return _results;
+    }
+  }, 0);
+
+  Odometer.init = function() {
+    var el, elements, _i, _len, _ref1, _results;
+    if (document.querySelectorAll == null) {
+      return;
+    }
+    elements = document.querySelectorAll(Odometer.options.selector || '.odometer');
+    _results = [];
+    for (_i = 0, _len = elements.length; _i < _len; _i++) {
+      el = elements[_i];
+      _results.push(el.odometer = new Odometer({
+        el: el,
+        value: (_ref1 = el.innerText) != null ? _ref1 : el.textContent
+      }));
+    }
+    return _results;
+  };
+
+  if ((((_ref1 = document.documentElement) != null ? _ref1.doScroll : void 0) != null) && (document.createEventObject != null)) {
+    _old = document.onreadystatechange;
+    document.onreadystatechange = function() {
+      if (document.readyState === 'complete' && Odometer.options.auto !== false) {
+        Odometer.init();
+      }
+      return _old != null ? _old.apply(this, arguments) : void 0;
+    };
+  } else {
+    document.addEventListener('DOMContentLoaded', function() {
+      if (Odometer.options.auto !== false) {
+        return Odometer.init();
+      }
+    }, false);
+  }
+
+  if (typeof define === 'function' && define.amd) {
+    define([], function() {
+      return Odometer;
+    });
+  } else if (typeof exports !== "undefined" && exports !== null) {
+    module.exports = Odometer;
+  } else {
+    window.Odometer = Odometer;
+  }
+
+}).call(this);
+</script>
+
+<script>
+    // B站粉丝数
+    const UID = "189841470";
+    const countEl = document.getElementById('count');
+
+    const od = new Odometer({
+        el: countEl,
+        value: 0,
+        format: '(,ddd)',
+        duration: 1000
+    });
+
+    async function fetchData() {
+        const url = `/bili-api/x/relation/stat?vmid=${UID}&_=${Date.now()}`;
+        
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+            const result = await res.json();
+
+            if (result && result.data && typeof result.data.follower !== 'undefined') {
+                const count = result.data.follower;
+                od.update(count);
+            }
+        } catch (e) {
+            console.error("请求失败:", e);
+        }
+    }
+
+    setInterval(fetchData, 2000);
+    fetchData();
+
+    // 学习时钟功能
+    let timers = [];
+    let timerIdCounter = 0;
+    let clockVisible = false;
+
+    function toggleClock() {
+        clockVisible = !clockVisible;
+        const clockSection = document.getElementById('clockSection');
+        const fansSection = document.querySelector('.fans-section');
+        
+        if (clockVisible) {
+            clockSection.classList.add('active');
+            fansSection.classList.remove('full-width');
+        } else {
+            clockSection.classList.remove('active');
+            fansSection.classList.add('full-width');
+        }
+    }
+
+    function updateCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('currentTime').textContent = `${hours}:${minutes}`;
+    }
+
+    function startTimer(minutes) {
+        if (!clockVisible) toggleClock();
+        
+        const timerId = timerIdCounter++;
+        const endTime = Date.now() + minutes * 60 * 1000;
+        
+        const timer = {
+            id: timerId,
+            label: `${minutes}分钟`,
+            endTime: endTime,
+            interval: null
+        };
+
+        timers.push(timer);
+        createTimerCard(timer);
+        startTimerCountdown(timer);
+    }
+
+    function startCustomTimer() {
+        const input = document.getElementById('customMinutes');
+        const minutes = parseInt(input.value);
+
+        if (!minutes || minutes < 1) {
+            alert('请输入有效的分钟数');
+            return;
+        }
+
+        startTimer(minutes);
+        input.value = '';
+    }
+
+    function createTimerCard(timer) {
+        const container = document.getElementById('timersList');
+        const card = document.createElement('div');
+        card.className = 'timer-card';
+        card.id = `timer-${timer.id}`;
+        card.innerHTML = `
+            <div class="timer-header">
+                <span class="timer-title">${timer.label}</span>
+                <button class="cancel-btn" onclick="cancelTimer(${timer.id})">✕</button>
+            </div>
+            <div class="timer-display" id="display-${timer.id}">--:--</div>
+        `;
+        container.appendChild(card);
+    }
+
+    function startTimerCountdown(timer) {
+        timer.interval = setInterval(() => {
+            const remaining = timer.endTime - Date.now();
+
+            if (remaining <= 0) {
+                clearInterval(timer.interval);
+                removeTimer(timer.id);
+                showCelebration();
+                return;
+            }
+
+            updateTimerDisplay(timer.id, remaining);
+        }, 100);
+    }
+
+    function updateTimerDisplay(timerId, remaining) {
+        const display = document.getElementById(`display-${timerId}`);
+        if (!display) return;
+
+        const totalSeconds = Math.ceil(remaining / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        display.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        display.classList.remove('warning', 'danger');
+        if (totalSeconds <= 10) {
+            display.classList.add('danger');
+        } else if (totalSeconds <= 60) {
+            display.classList.add('warning');
+        }
+    }
+
+    function cancelTimer(timerId) {
+        const timer = timers.find(t => t.id === timerId);
+        if (timer) {
+            clearInterval(timer.interval);
+            removeTimer(timerId);
+        }
+    }
+
+    function removeTimer(timerId) {
+        timers = timers.filter(t => t.id !== timerId);
+        const card = document.getElementById(`timer-${timerId}`);
+        if (card) {
+            card.style.opacity = '0';
+            setTimeout(() => card.remove(), 300);
+        }
+    }
+
+    function showCelebration() {
+        const overlay = document.getElementById('celebrationOverlay');
+        overlay.classList.add('active');
+        startNotificationLoop();
+    }
+
+    function closeCelebration() {
+        const overlay = document.getElementById('celebrationOverlay');
+        overlay.classList.remove('active');
+        stopNotificationLoop();
+    }
+
+    // 音频循环相关变量
+    let audioContext = null;
+    let notificationInterval = null;
+
+    function startNotificationLoop() {
+        // 停止之前的循环（如果有）
+        stopNotificationLoop();
+        
+        // 立即播放一次
+        playNotificationSound();
+        
+        // 设置循环播放，每1.5秒播放一次
+        notificationInterval = setInterval(() => {
+            playNotificationSound();
+        }, 1500);
+    }
+
+    function stopNotificationLoop() {
+        if (notificationInterval) {
+            clearInterval(notificationInterval);
+            notificationInterval = null;
+        }
+        if (audioContext) {
+            audioContext.close();
+            audioContext = null;
+        }
+    }
+
+    function playNotificationSound() {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // 更悦耳的音调
+        oscillator.frequency.value = 880; // A5音符
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.8);
+    }
+
+    document.getElementById('customMinutes').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') startCustomTimer();
+    });
+
+    // 尝试锁定横屏方向（需要 Fullscreen API 支持）
+    function lockLandscape() {
+        const orientation = screen.orientation || screen.mozOrientation || screen.msOrientation;
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+        }
+    }
+    // 进入全屏时锁定横屏
+    document.addEventListener('fullscreenchange', lockLandscape);
+    document.addEventListener('webkitfullscreenchange', lockLandscape);
+    // 页面加载时尝试锁定
+    lockLandscape();
+
+    // 初始化
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+
+    // MC服务器人数 — 通过 Query 协议实时查询，3秒刷新
+    const MC_HOST = 'puremilk.vip';
+    const MC_GAME_PORT = 25578;   // 游戏端口（用于 mcstatus.io 定位服务器）
+    const MC_QUERY_PORT = 25511;  // Query 协议端口
+    const mcPlayersEl = document.getElementById('mcPlayers');
+    const mcDotEl = document.getElementById('mcDot');
+
+    async function fetchMCStatus() {
+        try {
+            const res = await fetch(
+                `https://api.mcstatus.io/v2/status/java/${MC_HOST}:${MC_GAME_PORT}?query_port=${MC_QUERY_PORT}`,
+                { cache: 'no-store' }
+            );
+            if (!res.ok) throw new Error('fetch fail');
+            const data = await res.json();
+            if (data.online) {
+                const online = data.players?.online ?? 0;
+                const max = data.players?.max ?? '?';
+                mcPlayersEl.textContent = `${online} 在线`;
+                mcPlayersEl.className = 'mc-widget-count online';
+                mcDotEl.className = 'mc-widget-dot online';
+            } else {
+                mcPlayersEl.textContent = '服务器离线';
+                mcPlayersEl.className = 'mc-widget-count offline';
+                mcDotEl.className = 'mc-widget-dot';
+            }
+        } catch(e) {
+            mcPlayersEl.textContent = '无法连接';
+            mcPlayersEl.className = 'mc-widget-count offline';
+            mcDotEl.className = 'mc-widget-dot';
+        }
+    }
+
+    fetchMCStatus();
+    setInterval(fetchMCStatus, 3000);
+
+    // 全屏切换
+    function toggleFullscreen() {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            const el = document.documentElement;
+            if (el.requestFullscreen) el.requestFullscreen();
+            else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        }
+    }
+
+    function updateFsIcon() {
+        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        const icon = document.getElementById('fsIcon');
+        if (isFs) {
+            // 退出全屏图标（内缩箭头）
+            icon.innerHTML = `<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>`;
+        } else {
+            // 进入全屏图标（外展箭头）
+            icon.innerHTML = `<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>`;
+        }
+    }
+
+    document.addEventListener('fullscreenchange', updateFsIcon);
+    document.addEventListener('webkitfullscreenchange', updateFsIcon);
+</script>
+
+    <!-- 全屏按钮 -->
+    <button class="fullscreen-btn" id="fullscreenBtn" title="全屏" onclick="toggleFullscreen()">
+        <svg id="fsIcon" viewBox="0 0 24 24">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+            <path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
+            <path d="M3 16v3a2 2 0 0 0 2 2h3"/>
+            <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+        </svg>
+    </button>
+</body>
+</html>
